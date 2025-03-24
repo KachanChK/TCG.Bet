@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Minha Carteira</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+    <script src="./scripts/wallet.js" defer></script>
+    <style>
+        body {
+            background-color: #1C1C1C;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .navbar {
+            background-color: black;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #fec107;
+        }
+
+        .navbar-brand:hover,
+        .navbar-nav .nav-link:hover {
+            color: #fff;
+        }
+
+        .modal-content {
+            background-color: #1C1C1C;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .form-text {
+            color: #ffffffa6;
+        }
+
+        .btn-primary {
+            background-color: #fec107;
+            border-color: #fec107;
+            color: black;
+        }
+
+        .btn-primary:hover {
+            background-color: #fec007af;
+            border-color: #fec007af;
+            color: black;
+        }
+
+        .btn-primary:focus {
+            background-color: #fec007af;
+            border-color: #fec007af;
+            color: black;
+            box-shadow: none;
+        }
+        
+        .btn-primary:active {
+            background-color: #fec007af;
+            border-color: #fec007af;
+            color: black;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background-color: #DCDCDC;
+            border-color: #DCDCDC;
+            color: black;
+        }
+
+        .btn-secondary:hover {
+            background-color: #C0C0C0;
+            border-color: #C0C0C0;
+            color: black;
+        }
+
+        .form-control {
+            background-color: #A9A9A9;
+            border-color: #A9A9A9;
+            color: black;
+        }
+
+        .form-check-input:checked {
+            background-color: #fec107;
+            border-color: #fec107;
+        }
+
+        .form-check-input:focus {
+            outline: 1px solid #fec107;
+            outline-offset: 2px;
+        }
+
+        .form-check-input:focus-visible {
+            outline: 1px solid #fec107;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage"><i class="fas fa-dice"></i>TCG.Bet</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage">Eventos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="logout()" id="sairLink" href="/homepage">Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="mainContent" class="container" style="padding-top: 20px;">
+        <div class="row">
+            <div class="col">
+                <h3>Histórico</h3>
+            </div>
+            <div class="col-md-auto">
+                <h5>Saldo: R$<span id="ShowBalance"></span></h5>
+            </div>
+            <div class="col-md-auto">
+                <button type="button" class="btn btn-primary" style="float:right;" data-bs-toggle="modal"
+                    data-bs-target="#addFundsModal">
+                    <i class="fas fa-plus"></i> Adicionar Créditos</button>
+            </div>
+            <div class="col-md-auto">
+                <button type="button" class="btn btn-primary" style="float:right;" data-bs-toggle="modal"
+                    data-bs-target="#withdrawFundsModal">
+                    <i class="fas fa-minus"></i> Saque</button>
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col">
+                <table id="walletHistory" class="table table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center">Tipo</th>
+                            <th scope="col" class="text-left">Valor R$:</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Transações serão adicionados dinamicamente aqui. 
+                        consultar a função ''
+                        -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addFundsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <form id="depositForm">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Depositar</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5 class="card-title">Preencha os dados do cartão</h5>
+                        <div class="mb-3">
+                            <label for="cardNumberA" class="form-label">Número do cartão</label>
+                            <input type="text" class="form-control" id="cardNumberA" placeholder="1234 5678 9012 3456"
+                                maxlength="19" aria-describedby="cardNumberAHelp">
+                        </div>
+                        <div id="cardNumberAHelp" class="form-text">
+                            Informe apenas valores como: 1234567890123456 (sem espaços)
+                        </div>
+                        <div class="mb-3">
+                            <label for="cardNameA" class="form-label">nome no cartão</label>
+                            <input type="text" class="form-control" id="cardNameA" placeholder="Nome Sobrenome">
+                        </div>
+                        <div class="row">
+                            <h6 class="card-title">Validade do cartão</h6>
+                            <div class="col">
+                                <label for="cardExpiryA" class="form-label">data</label>
+                                <input type="text" class="form-control" id="cardExpiryA" placeholder="mm/yy">
+                            </div>
+                            <div class="col">
+                                <label for="cardCodeA" class="form-label">CVV</label>
+                                <input type="text" class="form-control" placeholder="cvv" id="cardCodeA" maxlength="3"
+                                    oninput="this.value =this.value.replace(/[^0-9]/g, '')">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Valor do depósito</h6>
+                            <input type="text" class="form-control w-25" id="depositPrice"
+                                aria-describedby="depositPriceHelp" maxlength="12" required>
+                            <div id="depositPriceHelp" class="form-text">
+                                Informe apenas valores como exemplo: 10.00, 150.99, 1500.21
+                            </div>
+                        </div>
+                    </div>
+                    <p id="message"></p>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" id="addFunds">Depositar</button>
+                    </div>
+                </div>
+        </form>
+    </div>
+    </div>
+    <div class="modal fade" id="withdrawFundsModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <form id="withdrawForm">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Sacar</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-check">
+                            <label>
+                                <input class="form-check-input" type="radio" name="method" value="pix"
+                                    onclick="mostrarCampos('pix')" checked>
+                                Saque por Pix
+                            </label>
+                            
+                        </div>
+                        <div>
+                            <label>
+                                <input class="form-check-input" type="radio" name="method" value="bank"
+                                    onclick="mostrarCampos('bank')">
+                                Conta Bancária
+                            </label>
+                        </div>
+
+                        <div id="pixFields" style="display:block;">
+                            <div class="mb-3">
+                                <label for="pixKey" class="form-label">Chave do Pix</label>
+                                <input type="text" class="form-control" id="pixKey" placeholder="Digite sua chave Pix">
+                            </div>
+                        </div>
+
+                        <div id="bankFields" style="display:none;">
+                            <div class="mb-3">
+                                <label for="bankAccount" class="form-label">Número da Conta</label>
+                                <input type="text" class="form-control" id="bankAccount" placeholder="Número da conta">
+                            </div>
+                            <div class="mb-3">
+                                <label for="bankAgency" class="form-label">Agência</label>
+                                <input type="text" class="form-control" id="bankAgency" placeholder="Agência"
+                                    maxlength="5">
+                            </div>
+                            <div class="mb-3">
+                                <label for="bankName" class="form-label">Nome do Banco</label>
+                                <input type="text" class="form-control" id="bankName" placeholder="Nome do banco">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Valor do saque</h6>
+                            <input type="text" class="form-control w-25" id="withdrawValue"
+                                aria-describedby="withdrawFundseHelp" maxlength="12">
+                            <div id="withdrawFundsHelp" class="form-text">
+                                Informe apenas valores como exemplo: 10.00, 150.99, 1500.21
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h5>Saque após taxas: <span id="showWithDraw"></span></h5>
+                        </div>
+                    </div>
+                    <p id="messageWithdraw"></p>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" id="withdrawFunds">Sacar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script>
+        document.getElementById('cardNumberA').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ');
+            e.target.value = value;
+        });
+
+        document.getElementById('cardNameA').addEventListener("keypress", function (e) {
+            const keyCode = (e.keyCode ? e.keyCode : e.wich);
+            if (keyCode > 32 && keyCode < 65 || keyCode > 90 && keyCode < 97 || keyCode > 122 && keyCode < 126) {
+                e.preventDefault();
+            }
+        });
+
+        document.getElementById('bankName').addEventListener("keypress", function (e) {
+            const keyCode = (e.keyCode ? e.keyCode : e.wich);
+            if (keyCode > 32 && keyCode < 65 || keyCode > 90 && keyCode < 97 || keyCode > 122 && keyCode < 126) {
+                e.preventDefault();
+            }
+        });
+        const inputDep = document.getElementById("depositPrice");
+
+        inputDep.addEventListener("input", function (e) {
+            let value = e.target.value;
+            value = value.replace(/\D/g, "");
+            value = (value / 100).toFixed(2).replace(".", ",");
+            value = "R$ " + value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            e.target.value = value;
+        });
+
+        inputDep.addEventListener("focus", function (e) {
+            if (e.target.value === "") {
+                e.target.value = "R$ 0,00";
+            }
+        });
+
+        inputDep.addEventListener("blur", function (e) {
+            if (e.target.value === "R$ 0,00") {
+                e.target.value = "";
+            }
+        });
+
+        const inputSaq = document.getElementById("withdrawValue");
+
+        inputSaq.addEventListener("input", function (e) {
+            let value = e.target.value;
+            value = value.replace(/\D/g, "");
+            value = (value / 100).toFixed(2).replace(".", ",");
+            value = "R$ " + value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            e.target.value = value;
+        });
+
+        inputSaq.addEventListener("focus", function (e) {
+            if (e.target.value === "") {
+                e.target.value = "R$ 0,00";
+            }
+        });
+
+        inputSaq.addEventListener("blur", function (e) {
+            if (e.target.value === "R$ 0,00") {
+                e.target.value = "";
+            }
+        });
+
+        const showWithdraw = document.getElementById("showWithDraw");
+        inputSaq.addEventListener("input", function (e) {
+            let value = e.target.value.replace(/[^\d]/g, "");
+            value = parseFloat(value) / 100;
+            let taxa = 0;
+            if (value <= 100) {
+                taxa = 0.04;
+            } else if (value <= 1000) {
+                taxa = 0.03;
+            } else if (value <= 5000) {
+                taxa = 0.02;
+            } else if (value <= 100000) {
+                taxa = 0.01;
+            } else {
+                taxa = 0;
+            }
+            const valorFinal = value - value * taxa;
+
+            const formatar = (num) =>
+                num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+            e.target.value = formatar(value);
+            showWithdraw.textContent = formatar(valorFinal);
+        });
+        inputSaq.addEventListener("focus", function (e) {
+            if (e.target.value === "") {
+                e.target.value = "R$ 0,00";
+            }
+        });
+        inputSaq.addEventListener("blur", function (e) {
+            if (e.target.value === "R$ 0,00") {
+                e.target.value = "";
+            }
+        });
+
+        const expiryA = document.getElementById("cardExpiryA");
+
+        expiryA.addEventListener("input", function (e) {
+            let value = e.target.value;
+
+            // Remove tudo que não for número
+            value = value.replace(/\D/g, "");
+
+            // Adiciona a barra após o mês
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + "/" + value.substring(2, 4);
+            }
+
+            // Limita a entrada ao formato MM/AA
+            value = value.substring(0, 5);
+
+            e.target.value = value;
+        });
+
+        function mostrarCampos(method) {
+            if (method === 'pix') {
+                // Exibe os campos do Pix e esconde os campos do Bank Account
+                document.getElementById('pixFields').style.display = 'block';
+                document.getElementById('bankFields').style.display = 'none';
+            } else if (method === 'bank') {
+                // Exibe os campos do Bank Account e esconde os campos do Pix
+                document.getElementById('pixFields').style.display = 'none';
+                document.getElementById('bankFields').style.display = 'block';
+            }
+        }
+
+        document.getElementById("bankAgency").addEventListener("input", function (e) {
+            let valor = event.target.value;
+
+            // Remove qualquer caractere que não seja número
+            valor = valor.replace(/\D/g, '');
+
+            // Adiciona a máscara '0000-0'
+            if (valor.length > 4) {
+                valor = valor.slice(0, 4) + '-' + valor.slice(4, 5); // Formato correto: '0000-0'
+            }
+
+            // Atualiza o valor do campo com a máscara
+            event.target.value = valor;
+        });
+
+        document.getElementById("bankAccount").addEventListener("input", function (e) {
+            let valor = event.target.value;
+
+            // Remove qualquer caractere que não seja número
+            valor = valor.replace(/\D/g, '');
+
+            // Adiciona a máscara '000000000000-00'
+            if (valor.length > 12) {
+                valor = valor.slice(0, 12) + '-' + valor.slice(12, 14); // Formato correto: '000000000000-00'
+            }
+
+            // Atualiza o valor do campo com a máscara
+            event.target.value = valor;
+        });
+    </script>
+</body>
+
+</html>
