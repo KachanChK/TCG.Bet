@@ -1,0 +1,10 @@
+flowchart TD
+    Browser["Browser / paginas publicas"] --> Express["Express routes"]
+    Express --> Services["Services de compatibilidade"]
+    Services --> UseCases["Application use cases"]
+    UseCases --> Domain["Domain rules"]
+    UseCases --> Ports["Application ports"]
+    Ports --> Adapters["Infrastructure adapters"]
+    Adapters --> Oracle["OracleDB"]
+    Adapters --> JWT["JWT"]
+    Adapters --> Mail["Nodemailer"]

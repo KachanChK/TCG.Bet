@@ -1,0 +1,28 @@
+sequenceDiagram
+    actor User as Usuario
+    participant Route as POST /event/bet
+    participant Service as betEvent service
+    participant UseCase as PlaceBetUseCase
+    participant Auth as JwtOracleAuthAdapter
+    participant Wallets as OracleWalletRepository
+    participant Events as OracleEventRepository
+    participant Bets as OracleBetRepository
+    participant DB as OracleDB
+
+    User->>Route: Envia token e dados da aposta
+    Route->>Service: betEvent(connection, bet, token)
+    Service->>UseCase: execute(request)
+    UseCase->>Auth: authenticate(token)
+    Auth->>DB: valida JWT e papel do usuario
+    UseCase->>Events: findById(eventId)
+    Events->>DB: consulta evento
+    UseCase->>Wallets: findByOwnerId(userId)
+    Wallets->>DB: consulta carteira
+    UseCase->>Wallets: setBalance(novoSaldo)
+    Wallets->>DB: atualiza saldo
+    UseCase->>Bets: create(aposta)
+    Bets->>DB: insere aposta
+    UseCase->>Wallets: addHistory(Aposta)
+    Wallets->>DB: insere historico
+    Service->>DB: commit()
+    Route-->>User: 201 Aposta realizada

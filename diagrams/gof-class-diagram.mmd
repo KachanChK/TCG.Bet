@@ -1,0 +1,36 @@
+classDiagram
+    class PayoutStrategy {
+        <<interface>>
+        +calculatePayouts(winningGuess, bets)
+    }
+    class PoolPayoutStrategy {
+        +calculatePayouts(winningGuess, bets)
+    }
+    class FinishEventUseCase {
+        -payoutStrategy: PayoutStrategy
+        +execute(request)
+    }
+    class WalletTransactionFactory {
+        +deposit(walletId, amountInCents)
+        +withdraw(walletId, amountInCents)
+        +bet(walletId, amountInCents)
+        +win(walletId, amountInCents)
+    }
+    class WalletRepository {
+        <<interface>>
+        +findByOwnerId(ownerId)
+        +setBalance(ownerId, balanceInCents)
+        +increaseBalance(ownerId, amountInCents)
+        +addHistory(transaction)
+    }
+    class OracleWalletRepository {
+        +findByOwnerId(ownerId)
+        +setBalance(ownerId, balanceInCents)
+        +increaseBalance(ownerId, amountInCents)
+        +addHistory(transaction)
+    }
+    PayoutStrategy <|.. PoolPayoutStrategy
+    FinishEventUseCase --> PayoutStrategy
+    FinishEventUseCase --> WalletRepository
+    FinishEventUseCase --> WalletTransactionFactory
+    WalletRepository <|.. OracleWalletRepository

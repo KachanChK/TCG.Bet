@@ -1,0 +1,351 @@
+openapi: 3.0.3
+info:
+  title: TCG.Bet API
+  version: 1.0.0
+  description: API REST para contas, carteira, eventos, apostas e moderacao do TCG.Bet.
+servers:
+  - url: http://localhost:3000
+security:
+  - bearerAuth: []
+paths:
+  /account/signUp:
+    post:
+      tags: [Account]
+      summary: Cadastra um usuario
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignUpRequest"
+      responses:
+        "201":
+          description: Cadastro concluido
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /account/login:
+    post:
+      tags: [Account]
+      summary: Autentica um usuario
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "201":
+          description: Login realizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /auth/tokenAuth:
+    post:
+      tags: [Auth]
+      summary: Valida o token JWT
+      responses:
+        "201":
+          description: Token valido
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /account/getWallet:
+    get:
+      tags: [Wallet]
+      summary: Consulta carteira e historico
+      responses:
+        "201":
+          description: Carteira encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /account/addFunds:
+    post:
+      tags: [Wallet]
+      summary: Adiciona fundos a carteira
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletMovementRequest"
+      responses:
+        "201":
+          description: Fundos adicionados
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /account/withdrawFunds:
+    post:
+      tags: [Wallet]
+      summary: Saca fundos da carteira
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletMovementRequest"
+      responses:
+        "201":
+          description: Fundos sacados
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /event/addEvent:
+    post:
+      tags: [Event]
+      summary: Cria um evento pendente de moderacao
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEventRequest"
+      responses:
+        "201":
+          description: Evento criado
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /event/deleteEvent:
+    delete:
+      tags: [Event]
+      summary: Cancela um evento do usuario autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+      responses:
+        "201":
+          description: Evento cancelado
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /event/getEvents:
+    get:
+      tags: [Event]
+      summary: Lista eventos aprovados
+      security: []
+      responses:
+        "201":
+          description: Lista de eventos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /event/getMyEvents:
+    get:
+      tags: [Event]
+      summary: Lista eventos do usuario autenticado
+      responses:
+        "201":
+          description: Lista de eventos do usuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /event/bet:
+    post:
+      tags: [Bet]
+      summary: Realiza uma aposta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BetRequest"
+      responses:
+        "201":
+          description: Aposta realizada
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /mod/evaluateEvent:
+    post:
+      tags: [Moderation]
+      summary: Aprova ou reprova um evento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluateEventRequest"
+      responses:
+        "201":
+          description: Evento avaliado
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /mod/finishEvent:
+    post:
+      tags: [Moderation]
+      summary: Finaliza um evento encerrado e distribui ganhos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinishEventRequest"
+      responses:
+        "201":
+          description: Evento finalizado
+        "400":
+          $ref: "#/components/responses/BadRequest"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: Requisicao invalida
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+    SignUpRequest:
+      type: object
+      required: [username, email, password, birthdate]
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        birthdate:
+          type: string
+          example: 31/12/1999
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        token:
+          type: string
+    WalletMovementRequest:
+      type: object
+      required: [balance]
+      properties:
+        balance:
+          type: number
+          description: Valor em reais informado pelo usuario.
+          example: 25.5
+    WalletResponse:
+      type: object
+      properties:
+        wallet:
+          type: array
+          items:
+            $ref: "#/components/schemas/Wallet"
+        walletHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/WalletHistory"
+    Wallet:
+      type: object
+      properties:
+        ID:
+          type: integer
+        BALANCE:
+          type: number
+          description: Saldo persistido em centavos.
+        OWNER_ID:
+          type: integer
+    WalletHistory:
+      type: object
+      properties:
+        ID:
+          type: integer
+        TRANSACTION_TYPE:
+          type: string
+          enum: [Deposito, Saque, Aposta, Ganho]
+        AMOUNT:
+          type: number
+        WALLET_ID:
+          type: integer
+    CreateEventRequest:
+      type: object
+      required: [title, description, quota_value, event_date, event_bet_ends]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        quota_value:
+          type: number
+        event_date:
+          type: string
+          example: 31/12/2026
+        event_bet_ends:
+          type: string
+          example: 30/12/2026
+    Event:
+      type: object
+      additionalProperties: true
+    BetRequest:
+      type: object
+      required: [quotas_amount, bet_amount, guess, event_id]
+      properties:
+        quotas_amount:
+          type: integer
+          minimum: 1
+        bet_amount:
+          type: number
+        guess:
+          type: string
+          enum: [Sim, Nao, Não]
+        event_id:
+          type: integer
+    EvaluateEventRequest:
+      type: object
+      required: [event_id, avaliation]
+      properties:
+        event_id:
+          type: integer
+        avaliation:
+          type: string
+          enum: [Aprovado, Reprovado]
+        motive:
+          type: string
+    FinishEventRequest:
+      type: object
+      required: [id, result]
+      properties:
+        id:
+          type: integer
+        result:
+          type: string
+          enum: [Sim, Nao, Não]
