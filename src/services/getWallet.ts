@@ -1,14 +1,17 @@
-import { ConnectionHandler } from "../database/connection";
-import { auth } from "../microServices/tokenAuth"
 import OracleDB from "oracledb";
+import { JwtOracleAuthAdapter } from "../infrastructure/auth/JwtOracleAuthAdapter";
 
 export const getWallet = async (connection: OracleDB.Connection, token: string): Promise<{ success: boolean; wallet?: any[]; walletHistory?: any[]; error?: string; }> => {
     try {
-        let authResult = await ConnectionHandler.connectAndExecute(connection => auth(connection, token))
+        let authResult = await new JwtOracleAuthAdapter(connection).authenticate(token)
         if (!authResult.success) {
             return { success: false, error: authResult.error }
         }
-        const userId = authResult.userId;
+        const user = authResult.data;
+        if (!user) {
+            return { success: false, error: "Token invÃ¡lido." }
+        }
+        const userId = user.userId;
         const wallet: any = await connection.execute(
             `SELECT * FROM wallets WHERE owner_id = :userId`,
             [userId], 

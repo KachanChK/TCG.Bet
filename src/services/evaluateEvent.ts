@@ -1,20 +1,22 @@
-import { ConnectionHandler } from '../database/connection';
-import { auth } from '../microServices/tokenAuth';
 import { EvaluateInfo } from "../models/EvaluateInfo";
 import OracleDB from "oracledb";
 import { sendMail } from "../microServices/mailService";
 import fs from "fs";
 import path from "path";
+import { JwtOracleAuthAdapter } from '../infrastructure/auth/JwtOracleAuthAdapter';
 
 
 export const evaluateEvent = async (connection: OracleDB.Connection, evaluateInfo: EvaluateInfo, token: string): Promise<{ success: boolean; error?: string; }> => {
     try {
-        let authResult = await ConnectionHandler.connectAndExecute(connection => auth(connection, token))
+        let authResult = await new JwtOracleAuthAdapter(connection).authenticate(token)
         if (!authResult.success) {
             return { success: false, error: authResult.error }
         }
-        const userId = authResult.userId;
-        const isMod = authResult.isMod;
+        const user = authResult.data;
+        if (!user) {
+            return { success: false, error: "Token invÃ¡lido." }
+        }
+        const isMod = user.isModerator;
         if (!isMod) {
             return { success: false, error: "Área restrita para moderadores." }
         }
