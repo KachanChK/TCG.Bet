@@ -1,42 +1,123 @@
-# Site de Apostas em Eventos Futuros
+# TCG.Bet
 
-Este projeto é uma aplicação web para gerenciar e realizar apostas em eventos futuros.
+Aplicacao web para apostas em eventos futuros, desenvolvida em Node.js, TypeScript, Express e OracleDB.
 
-O Site de Apostas em Eventos Futuros permite que os usuários 
-visualizem uma lista de eventos futuros,
-realizem apostas em eventos selecionados,
-consultem resultados de apostas,
-gerenciem suas contas e histórico de apostas.
+O sistema permite cadastro/login, criacao de eventos, moderacao, apostas, carteira digital, depositos, saques, historico financeiro e finalizacao de eventos com distribuicao de ganhos.
 
-Tecnologias Utilizadas:
+## Objetivo arquitetural
 
-Node.js: Ambiente de execução para JavaScript no lado do servidor.
+Este repositorio foi organizado para demonstrar decisoes arquiteturais, atributos de qualidade, SOLID, Clean Code, padroes GoF e contrato formal de API.
 
-TypeScript: Superset do JavaScript que adiciona tipagem estática.
+Documentos principais:
 
-Oracle: Banco de dados utilizado.
+- [Arquitetura](docs/architecture.md)
+- [ADRs](adrs)
+- [OpenAPI](docs/openapi.yaml)
 
-Instruções: 
-- No terminal, utilize o comando "npm i" para instalar as dependencias necessárias;
-- Criar o arquivo ".env" e preencher conforme o ".env.exemple" mostra;
-- É necessário inicializar o banco de dados (criação das tabelas) para utilizar a aplicação. No terminal utilize o comando "npm run setup-db";
-- Para criar o build, no terminal utilize o comando "npm run build";
-- E por fim, para que o servidor comece a rodar deve-se escrever no terminal utilize o comando "npm run dev";
-- Vá ao seu navegador e escreva na barra de endereço o URL "localhost:3000/homepage" para acessar a homepage do site;
-- Moderadores devem ser adicionados manualmente pelo banco de dados;
-- Moderadores não tem telas, apenas rotas.
+## Stack
 
-Comandos de moderador (POSTMAN):
-/mod/evaluateEvent - Campos necessários para avaliar evento:
-event_id, avaliation ('Aprovado' ou 'Reprovado'), motive (Somente se reprovar o evento. Inserir motivo da reprova);
+- Node.js
+- TypeScript
+- Express
+- OracleDB
+- JWT
+- Nodemailer
+- Node Test Runner
+- Hash de senha com `scrypt` da biblioteca padrao do Node.js
 
-/mod/finishEvent - Campos necessário para finalizar evento:
-id (ID do evento), result (Resultado do evento 'Sim' ou 'Não').
+## Arquitetura
 
-Informações .env:
-JWT_PASS= (Coloque uma palavra ou sequência de caracteres aleatórios);
-MAIL_HOST="" (Host do email que ira utilizar para enviar os emails, ex: gmail, outlook...);
-MAIL_USERNAME="" (Username do email que ira utilizar para enviar os emails, ex: joao@gmail.com, coloque apenas o joao);
-MAIL_PASSWORD="" (Senha de acesso que deve ser gerada no google para acessar os serviços do email se fazer login)
+O projeto usa um **monolito modular** com organizacao interna inspirada em Clean Architecture/Hexagonal:
 
-Siga o exemplo do .env.example para que tudo funcione corretamente.
+- `src/domain`: regras puras de dominio.
+- `src/application`: casos de uso e portas.
+- `src/infrastructure`: adaptadores concretos de OracleDB e JWT.
+- `src/services`: ponte entre rotas existentes e casos de uso.
+- `src/routes`: endpoints HTTP Express.
+- `adrs`: registros de decisoes arquiteturais.
+- `diagrams`: fontes Mermaid dos diagramas.
+- `docs/openapi.yaml`: contrato formal da API REST.
+
+## Padroes GoF aplicados
+
+- **Strategy**: `PoolPayoutStrategy` calcula a distribuicao de ganhos.
+- **Factory**: `WalletTransactionFactory` cria transacoes de deposito, saque, aposta e ganho.
+- **Adapter**: `JwtOracleAuthAdapter` e repositorios Oracle adaptam infraestrutura para as portas da aplicacao.
+
+## SOLID e Clean Code
+
+Evidencias no codigo:
+
+- Casos de uso focados: `MoveWalletFundsUseCase`, `PlaceBetUseCase`, `FinishEventUseCase`.
+- Dependencia de interfaces: `WalletRepository`, `BetRepository`, `EventRepository`, `AuthPort`.
+- Regras puras testaveis em `src/domain`.
+- Conversao monetaria centralizada em `toCents`.
+- Senhas novas armazenadas com hash por `PasswordHasher`.
+- `app.ts` monta a aplicacao; `server.ts` apenas inicia o servidor.
+
+## Configuracao
+
+Crie um arquivo `.env` seguindo o exemplo de `.env.example`:
+
+```env
+USER="USUARIO"
+PASSWORD="SENHA"
+CONN_STR="STRING CONEXAO"
+JWT_PASS=senhaforte
+MAIL_HOST="gmail"
+MAIL_USERNAME="<EmailID>"
+MAIL_PASSWORD="<Generated Password without Spaces>"
+```
+
+## Instalar e executar
+
+```bash
+npm install
+npm run setup-db
+npm run dev
+```
+
+Acesse:
+
+- Aplicacao: `http://localhost:3000/homepage`
+- OpenAPI: `http://localhost:3000/openapi.yaml`
+
+## Build e testes
+
+```bash
+npm run build
+npm test
+```
+
+Os testes atuais cobrem regras puras de dominio, especialmente calculo de premiacao, transacoes de carteira e hash de senha.
+
+## Rotas principais
+
+- `POST /account/signUp`
+- `POST /account/login`
+- `GET /account/getWallet`
+- `POST /account/addFunds`
+- `POST /account/withdrawFunds`
+- `POST /event/addEvent`
+- `DELETE /event/deleteEvent`
+- `GET /event/getEvents`
+- `GET /event/getMyEvents`
+- `POST /event/bet`
+- `POST /mod/evaluateEvent`
+- `POST /mod/finishEvent`
+
+Rotas autenticadas usam header:
+
+```http
+Authorization: Bearer <token>
+```
+
+## Observacoes para entrega academica
+
+Para o trabalho final, o grupo deve complementar o documento entregue ao professor com:
+
+- composicao do grupo;
+- justificativa do tema escolhido;
+- diagramas de componentes e fluxos principais;
+- relacao entre requisitos do trabalho e evidencias no repositorio;
+- link publico do repositorio Git.

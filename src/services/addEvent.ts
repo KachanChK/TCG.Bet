@@ -1,17 +1,20 @@
-import { ConnectionHandler } from '../database/connection';
 import { Event } from "../models/Event";
 import { parse } from 'date-fns';
 import OracleDB from "oracledb";
-import { auth } from '../microServices/tokenAuth';
+import { JwtOracleAuthAdapter } from '../infrastructure/auth/JwtOracleAuthAdapter';
 
 export const addEvent = async (connection: OracleDB.Connection, event: Event, token: string): Promise<{ success: boolean; error?: string; }> => {
     try {
-        let authResult = await ConnectionHandler.connectAndExecute(connection => auth(connection, token))
+        let authResult = await new JwtOracleAuthAdapter(connection).authenticate(token)
         if (!authResult.success) {
             return { success: false, error: authResult.error }
         }
-        const userId = authResult.userId;
-        const isMod = authResult.isMod;
+        const user = authResult.data;
+        if (!user) {
+            return { success: false, error: "Token invÃ¡lido." }
+        }
+        const userId = user.userId;
+        const isMod = user.isModerator;
         if (isMod) {
             return { success: false, error: "Não é possível criar evento como Moderador" }
         }

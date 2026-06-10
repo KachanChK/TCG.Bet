@@ -1,17 +1,18 @@
 {
-  "name": "express-template",
+  "name": "tcg-bet",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "start": "node ./build/src/server.js",
-    "dev": "nodemon src/app.ts",
-    "setup-db": "ts-node src/database/setupDatabase.ts"
+    "dev": "nodemon src/server.ts",
+    "setup-db": "ts-node src/database/setupDatabase.ts",
+    "test": "node --test -r ts-node/register tests/**/*.test.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Aplicacao web para apostas em eventos futuros com arquitetura documentada.",
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/date-fns": "^2.5.3",

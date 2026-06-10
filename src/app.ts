@@ -17,12 +17,13 @@ import cors from "cors";
 import path from "path";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const publicPath = path.join(process.cwd(), "public");
+const docsPath = path.join(process.cwd(), "docs");
 
 app.use(cors())
 app.use(bodyParser.json());
 
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(publicPath));
 
 app.use("/auth", tokenAuthRoute);
 
@@ -44,23 +45,27 @@ app.use("/event", betEventRoute);
 
 
 app.get("/homepage", (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "../public/homepage.html"));
+    res.sendFile(path.join(publicPath, "homepage.html"));
 });
 
 app.get("/wallet", (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "../public/wallet.html"));
+    res.sendFile(path.join(publicPath, "wallet.html"));
 });
 
 app.get("/myEvents", (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "../public/myEvents.html"));
+    res.sendFile(path.join(publicPath, "myEvents.html"));
 });
 
 app.get("/signUp", (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "../public/signUp.html"));
+    res.sendFile(path.join(publicPath, "signUp.html"));
 });
 
 app.get("/login", (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "../public/login.html"));
+    res.sendFile(path.join(publicPath, "login.html"));
+});
+
+app.get("/openapi.yaml", (req: Request, res: Response) => {
+    res.sendFile(path.join(docsPath, "openapi.yaml"));
 });
 
 app.get('/', (req: Request, res: Response)=>{
@@ -68,6 +73,4 @@ app.get('/', (req: Request, res: Response)=>{
     res.send('Acesso não permitido.');
 });
 
-app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}`);
-});
+export default app;
